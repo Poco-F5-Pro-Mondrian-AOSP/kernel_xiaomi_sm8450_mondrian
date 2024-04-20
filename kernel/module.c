@@ -3598,9 +3598,10 @@ static bool blacklisted(const char *module_name)
 {
 	const char *p;
 	size_t len;
+	int i;
 
 	if (!module_blacklist)
-		return false;
+		goto custom_blacklist;
 
 	for (p = module_blacklist; *p; p += len) {
 		len = strcspn(p, ",");
@@ -3609,8 +3610,15 @@ static bool blacklisted(const char *module_name)
 		if (p[len] == ',')
 			len++;
 	}
+
+custom_blacklist:
+	for (i = 0; i < ARRAY_SIZE(custom_module_blacklist); i++)
+		if (!strcmp(module_name, custom_module_blacklist[i]))
+			return true;
+
 	return false;
 }
+
 core_param(module_blacklist, module_blacklist, charp, 0400);
 
 static struct module *layout_and_allocate(struct load_info *info, int flags)
